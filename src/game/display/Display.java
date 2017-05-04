@@ -7,15 +7,18 @@ package game.display;
 
 import Main.Assets;
 import Main.Box;
+import Main.Dirty;
 import Main.Floor;
 import Main.Game;
 import Main.Robot;
 import Main.RunObstacle;
+import Main.paintJPanel;
 import controllers.MainController;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,6 +30,7 @@ import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 /**
@@ -35,8 +39,8 @@ import javax.swing.JPanel;
  */
 public class Display {
     private JFrame frame;
-    private JPanel rightPanel, upRightPanel, downRightPanel;
-    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton;
+    private paintJPanel upRightPanel, rightPanel, downRightPanel;
+    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, dirtyButton;
     private String title;
     private int frameWidth, frameHeight, canvasWidth, canvasHeight;
     private Canvas canvas;
@@ -50,9 +54,9 @@ public class Display {
         this.canvasHeight = 600;
         this.title = title;
         this.frame = new JFrame(this.title);
-        this.rightPanel = new JPanel();
-        this.upRightPanel = new JPanel();
-        this.downRightPanel = new JPanel();
+        this.rightPanel = new paintJPanel();
+        this.upRightPanel = new paintJPanel();
+        this.downRightPanel = new paintJPanel();
         this.game = new Game("Hello!");
         Game.robot = new Robot(-100, -100);
         Game.floor = new Floor();
@@ -62,6 +66,8 @@ public class Display {
         Game.nodeY = new ArrayList<>();
         Game.action = new ArrayList<>();
         Game.root = new ArrayList<>();
+        Game.cellX = new ArrayList<>();
+        Game.cellY = new ArrayList<>();
         MainController.readKnowledge();
         
         createDisplay();
@@ -76,23 +82,27 @@ public class Display {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+        frame.setBackground(Color.WHITE);
         
         // create right menu
         rightPanel.setSize(300, 600);
-        rightPanel.setBackground(Color.GREEN);
         rightPanel.setVisible(true);
         rightPanel.setLocation(660, 20);
+//        rightPanel.setBackground(Color.GREEN);
+        rightPanel.setImage(Assets.menuBackground);
+        rightPanel.paintComponents(rightPanel.getGraphics());
         rightPanel.setLayout(null);
         
         upRightPanel.setSize(280, 280);
-        upRightPanel.setBackground(Color.YELLOW);
+        upRightPanel.setImage(Assets.upBackground);
+        upRightPanel.paintComponents(upRightPanel.getGraphics());
         upRightPanel.setLocation(10, 10);
         upRightPanel.setLayout(null);
         upRightPanel.setVisible(true);
         
         downRightPanel.setSize(280, 280);
-        downRightPanel.setBackground(Color.YELLOW);
+        downRightPanel.setImage(Assets.downBackground);
+        downRightPanel.paintComponents(downRightPanel.getGraphics());
         downRightPanel.setLocation(10, 310);
         downRightPanel.setLayout(null);
         downRightPanel.setVisible(true);
@@ -103,6 +113,7 @@ public class Display {
         createRobotButton();
         createRunObstacleButton();
         createFixedObstacleButton();
+        createDirtyButton();
         
         rightPanel.add(downRightPanel);
         rightPanel.add(upRightPanel);
@@ -112,11 +123,10 @@ public class Display {
         canvas = new Canvas();
         canvas.setPreferredSize(new Dimension(this.canvasWidth + 20, this.canvasHeight + 20));
         canvas.setBounds(0, 0, this.canvasWidth + 20, this.canvasHeight + 20);
-//        canvas.setSize(this.canvasWidth + 20, this.canvasHeight + 20);
-//        canvas.setLocation(0, 0);
         canvas.setFocusable(false);
         
         frame.add(canvas);
+        frame.setVisible(true);
         
         // set to game
         this.game.setCanvas(canvas);
@@ -169,9 +179,12 @@ public class Display {
                 Game.nodeY = new ArrayList<>();
                 Game.action = new ArrayList<>();
                 Game.root = new ArrayList<>();
+                Game.cellX = new ArrayList<>();
+                Game.cellY = new ArrayList<>();
                 Game.robot = new Robot(-100, -100);
                 Game.robot.setIsDoing(false);
                 Game.robot.setIsRunning(false);
+                Game.robot.setIsSpinning(false);
                 Game.currentAction = -1000000000;
                 firstRun = true;
             }
@@ -205,6 +218,8 @@ public class Display {
                     Game.father.add(0);
                     Game.nodeX.add(x*60 + 20);
                     Game.nodeY.add(y*60 + 20);
+                    Game.cellX.add(x*60 + 20);
+                    Game.cellY.add(y*60 + 20);
                     Game.currentNode = Game.node.size() - 1;
                 }
             }
@@ -284,5 +299,47 @@ public class Display {
             public void mouseExited(MouseEvent e) {}
         });
     }
+    
+    public void createDirtyButton() {
+        dirtyButton = new JButton();
+        dirtyButton.setBounds(112, 100, 56, 56);
+        dirtyButton.setIcon(new ImageIcon(Assets.dirty));
+        downRightPanel.add(dirtyButton);
+        dirtyButton.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                
+            }
 
+            @Override
+            public void mousePressed(MouseEvent e) {
+               
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if ((e.getPoint().x >= -702 && e.getPoint().x <= -222) && (e.getPoint().y >= -350  && e.getPoint().y <= 130)) {
+                    Dirty dirty = new Dirty(0, 0);
+                    int x = 762 + e.getPoint().x + 20;
+                    int y = 410 + e.getPoint().y + 20;
+                    x = (x - 20) / 60;
+                    y = (y - 20) / 60;
+                    dirty.setX(x*60 + 20 + 5);
+                    dirty.setY(y*60 + 20 + 5);
+                    Game.floor.addEntity(dirty);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                
+            }
+            
+        });
+    }
 }

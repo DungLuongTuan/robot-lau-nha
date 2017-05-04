@@ -6,6 +6,7 @@
 package Main;
 
 import controllers.MainController;
+import static controllers.MainController.collision;
 import game.display.Display;
 import java.awt.BasicStroke;
 import java.awt.Canvas;
@@ -16,6 +17,7 @@ import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,6 +34,8 @@ public class Game implements Runnable {
     public static ArrayList<Integer> nodeY;
     public static ArrayList<Integer> action;
     public static ArrayList<Integer> root;
+    public static ArrayList<Integer> cellX;
+    public static ArrayList<Integer> cellY;
     public static int[][][][][][][][] status = new int[7][4][2][2][2][2][2][2];
     public static ArrayList<int[]> movement = new ArrayList<>();
     public static Floor floor;
@@ -48,11 +52,13 @@ public class Game implements Runnable {
     private Graphics g;
     private BufferStrategy bs;
     private boolean isRunning;
+    private int sparkle;
     
     public Game(String title) {
         this.width = 600;
         this.height = 600;
         this.title = title;
+        this.sparkle = 1;
     }
     
     public void init() {
@@ -61,20 +67,81 @@ public class Game implements Runnable {
     
     public void update() {
         ArrayList<Integer> actionClone = new ArrayList<>(this.action);
-        
+        Random rand = new Random();
+        boolean collision = true;
         if (isRunning == true) {
-//            for (Entity entity : this.floor.getEntities()) {
-//                entity.update();
-//            }
-
+            // xử lí va chạm vật cản di động và vật cản cô định
+            for(Entity e : this.floor.getEntities())
+                if(e instanceof RunObstacle) {
+                    for(Entity e1 : this.floor.getEntities())
+                        if (!(e1 instanceof RunObstacle))
+                            if (MainController.collision(e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY(), e1.getX(), e1.getY())) {
+                                if (((RunObstacle) e).getVelX() == 0) {
+                                    ((RunObstacle) e).setVelX(rand.nextInt(3) - 1);
+                                    if (((RunObstacle) e).getVelX() == 0) ((RunObstacle) e).setVelY(((RunObstacle) e).getVelY() * -1);
+                                    else ((RunObstacle) e).setVelY(0);
+                                }
+                                
+                                if (((RunObstacle) e).getVelY() == 0) {
+                                    ((RunObstacle) e).setVelY(rand.nextInt(3) - 1);
+                                    if (((RunObstacle) e).getVelY() == 0) ((RunObstacle) e).setVelX(((RunObstacle) e).getVelX() * -1);
+                                    else ((RunObstacle) e).setVelX(0);
+                                }
+                                System.out.println("11111");
+                                System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
+                                System.out.println(this.robot.getX() + " " + this.robot.getY());
+                                return;
+                            }
+                    
+//                    if ((this.robot != null) && (this.robot.getIsRunning()))
+//                        if (MainController.collision(this.robot.getX(), this.robot.getY(), e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY())) {
+//                            if (((RunObstacle) e).getVelX() == 0) {
+//                                ((RunObstacle) e).setVelX(rand.nextInt(3) - 1);
+//                                if (((RunObstacle) e).getVelX() == 0) ((RunObstacle) e).setVelY(((RunObstacle) e).getVelY() * -1);
+//                                else ((RunObstacle) e).setVelY(0);
+//                            }
+//                                
+//                            if (((RunObstacle) e).getVelY() == 0) {
+//                                ((RunObstacle) e).setVelY(rand.nextInt(3) - 1);
+//                                if (((RunObstacle) e).getVelY() == 0) ((RunObstacle) e).setVelX(((RunObstacle) e).getVelX() * -1);
+//                                else ((RunObstacle) e).setVelX(0);
+//                            }
+//                            System.out.println("2222222");
+//                            System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
+//                            System.out.println(this.robot.getX() + " " + this.robot.getY());
+//                            return;
+//                        }
+                    
+                    if ((this.robot != null) && (this.robot.getIsRunning()))
+                        if (MainController.collision(this.robot.getX() + this.robot.getVelX(), this.robot.getY() + this.robot.getVelY(), e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY())) {
+                            e.updateRunning();
+                            System.out.println("2222");
+                            return;
+                        }
+                    
+                    e.updateRunning();
+                }
+            
             if (this.robot != null && this.currentAction != -1000000000) {
                 if (this.robot.getIsDoing()) this.robot.updateRotation();
                 if (this.robot.getIsRunning()) this.robot.updateRunning();
+                if (this.robot.getIsSpinning()) this.robot.updateSpinning();
                 if (!this.robot.getIsDoing() && !this.robot.getIsRunning()) {
-                    if (this.currentAction == actionClone.size() - 1) MainController.nextStep();
-                    else {
-                        this.currentAction++;
-                        this.robot.setIsDoing(true);
+                    
+                    for (Entity e : this.floor.getEntities())
+                        if (e instanceof Dirty)
+                            if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
+                                this.robot.setIsSpinning(true);
+                                this.floor.getEntities().remove(e);
+                                break;
+                            }
+                    
+                    if (!this.robot.getIsSpinning()) {
+                        if (this.currentAction == actionClone.size() - 1) MainController.nextStep();
+                        else {
+                            this.currentAction++;
+                            this.robot.setIsDoing(true);
+                        }
                     }
                 }
             }
@@ -96,12 +163,6 @@ public class Game implements Runnable {
         // draw 
         g.drawImage(Assets.background, 20, 20, null);
         
-        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
-        int entitiesSize = cloneEntities.size();
-        for (int i = 0; i < entitiesSize; ++i) {
-            cloneEntities.get(i).render(g);
-        }
-        
         //draw spanning tree
         g.setColor(Color.RED);
         g2.setStroke(new BasicStroke(6));
@@ -111,6 +172,28 @@ public class Game implements Runnable {
         }
         g.setColor(null);
         
+        // draw pass cell
+        this.sparkle = (this.sparkle + 1) % 120;
+        for(int i = 0; i < Game.cellX.size(); ++i) {
+            if (this.sparkle < 40) {
+                g2.drawImage(Assets.sparkle, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
+                continue;
+            }
+            if (this.sparkle < 80) {
+                g2.drawImage(Assets.sparkle1, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
+                continue;
+            }
+            g2.drawImage(Assets.sparkle2, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
+        }
+        
+        // draw entities
+        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
+        int entitiesSize = cloneEntities.size();
+        for (int i = 0; i < entitiesSize; ++i) {
+            cloneEntities.get(i).render(g);
+        }
+        
+        // draw robot
         if (this.robot != null) this.robot.render(g);
 
         // end

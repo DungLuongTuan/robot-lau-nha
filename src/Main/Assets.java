@@ -30,7 +30,7 @@ public class Assets {
         String sparkleName = directory.getAbsolutePath() + "\\src\\Image\\sparkle2.png";
         String sparkle1Name = directory.getAbsolutePath() + "\\src\\Image\\sparkle3.png";
         String sparkle2Name = directory.getAbsolutePath() + "\\src\\Image\\sparkle4.png";
-        String dirtyName = directory.getAbsolutePath() + "\\src\\Image\\puddle-md.png";
+        String dirtyName = directory.getAbsolutePath() + "\\src\\Image\\dirty.png";
         
         background = MainController.loadImage(backgroundName);
         robot = MainController.loadImage(robotName);

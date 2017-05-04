@@ -42,7 +42,8 @@ public class Game implements Runnable {
     public static Robot robot;
     public static int currentNode;
     public static int currentAction = -1000000000;
-            
+    public static boolean isRunning = false;
+    
     private int width;
     private int height;
     private String title;
@@ -51,7 +52,6 @@ public class Game implements Runnable {
     private boolean running;
     private Graphics g;
     private BufferStrategy bs;
-    private boolean isRunning;
     private int sparkle;
     
     public Game(String title) {
@@ -68,13 +68,16 @@ public class Game implements Runnable {
     public void update() {
         ArrayList<Integer> actionClone = new ArrayList<>(this.action);
         Random rand = new Random();
-        boolean collision = true;
+        boolean collision = false;
+        boolean wallCollison = false;
+        
         if (isRunning == true) {
             // xử lí va chạm vật cản di động và vật cản cô định
             for(Entity e : this.floor.getEntities())
                 if(e instanceof RunObstacle) {
+                    wallCollison = false;
                     for(Entity e1 : this.floor.getEntities())
-                        if (!(e1 instanceof RunObstacle))
+                        if (!(e1 instanceof RunObstacle) && !(e1 instanceof Dirty))
                             if (MainController.collision(e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY(), e1.getX(), e1.getY())) {
                                 if (((RunObstacle) e).getVelX() == 0) {
                                     ((RunObstacle) e).setVelX(rand.nextInt(3) - 1);
@@ -89,8 +92,8 @@ public class Game implements Runnable {
                                 }
                                 System.out.println("11111");
                                 System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
-                                System.out.println(this.robot.getX() + " " + this.robot.getY());
-                                return;
+                                System.out.println(e1.getX() + " " + e1.getY());
+                                wallCollison = true;
                             }
                     
 //                    if ((this.robot != null) && (this.robot.getIsRunning()))
@@ -112,15 +115,18 @@ public class Game implements Runnable {
 //                            return;
 //                        }
                     
-                    if ((this.robot != null) && (this.robot.getIsRunning()))
+                    if (this.robot != null)
                         if (MainController.collision(this.robot.getX() + this.robot.getVelX(), this.robot.getY() + this.robot.getVelY(), e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY())) {
                             e.updateRunning();
                             System.out.println("2222");
-                            return;
+                            collision = true;
+                            continue;
                         }
                     
-                    e.updateRunning();
+                    if (!wallCollison) e.updateRunning();
                 }
+            
+            if (collision) return;
             
             if (this.robot != null && this.currentAction != -1000000000) {
                 if (this.robot.getIsDoing()) this.robot.updateRotation();
@@ -161,7 +167,11 @@ public class Game implements Runnable {
         g.clearRect(0, 0, width, height);
         
         // draw 
+        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
+        
         g.drawImage(Assets.background, 20, 20, null);
+        for(Entity e : cloneEntities)
+            if (e instanceof Brick) e.render(g);
         
         //draw spanning tree
         g.setColor(Color.RED);
@@ -187,12 +197,12 @@ public class Game implements Runnable {
         }
         
         // draw entities
-        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
-        int entitiesSize = cloneEntities.size();
-        for (int i = 0; i < entitiesSize; ++i) {
-            cloneEntities.get(i).render(g);
-        }
-        
+        for(Entity e : cloneEntities)
+            if (e instanceof Dirty) e.render(g);
+        for(Entity e : cloneEntities)
+            if (e instanceof Box) e.render(g);
+        for(Entity e : cloneEntities)
+            if (e instanceof RunObstacle) e.render(g);
         // draw robot
         if (this.robot != null) this.robot.render(g);
 
@@ -244,10 +254,6 @@ public class Game implements Runnable {
     
     public void setCanvas(Canvas canvas) {
         this.canvas = canvas;
-    }
-    
-    public void setIsRunning(boolean b) {
-        this.isRunning = b;
     }
     
 }

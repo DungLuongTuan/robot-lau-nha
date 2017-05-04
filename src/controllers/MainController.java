@@ -5,9 +5,16 @@
  */
 package controllers;
 
+import Main.Box;
 import Main.Dirty;
 import Main.Entity;
 import Main.Game;
+import Main.RunObstacle;
+import game.display.Display;
+import static game.display.Display.resultFrame;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +24,9 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  *
@@ -75,6 +85,7 @@ public class MainController {
         if ((x1 < x2) && (y2 < y1) && (x1 + 60 > x2) && (y2 + 60 > y1)) return true;
         if ((x2 < x1) && (y1 < y2) && (x2 + 60 > x1) && (y1 + 60 > y2)) return true;
         if ((x2 < x1) && (y2 < y1) && (x2 + 60 > x1) && (y2 + 60 > y1)) return true;
+        if ((x1 == x2) && (y1 == y2)) return true;
         return false;
     }
     
@@ -86,7 +97,7 @@ public class MainController {
         l = 3;
         c1 = c2 = c3 = c4 = c5 = c6 = 0;
         for(Entity e: Game.floor.getEntities()) {
-            if (!(e instanceof Dirty)) {
+            if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c1 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c2 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0))) c3 = 1;
@@ -115,7 +126,7 @@ public class MainController {
         l = 1;
         c1 = c2 = c3 = c4 = c5 = c6 = 0;
         for(Entity e: Game.floor.getEntities()) {
-            if (!(e instanceof Dirty)) {
+            if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0))) c1 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c2 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0))) c3 = 1;
@@ -144,7 +155,7 @@ public class MainController {
         l = 4;
         c1 = c2 = c3 = c4 = c5 = c6 = 0;
         for(Entity e: Game.floor.getEntities()) {
-            if (!(e instanceof Dirty)) {
+            if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c1 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0))) c2 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c3 = 1;
@@ -173,7 +184,7 @@ public class MainController {
         l = 2;
         c1 = c2 = c3 = c4 = c5 = c6 = 0;
         for(Entity e: Game.floor.getEntities()) {
-            if (!(e instanceof Dirty)) {
+            if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0))) c1 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0)) && (e.getY() - 2 == Game.nodeY.get(0))) c2 = 1;
                 if ((e.getX() - 2 == Game.nodeX.get(0) - 60) && (e.getY() - 2 == Game.nodeY.get(0) - 60)) c3 = 1;
@@ -206,18 +217,53 @@ public class MainController {
         boolean doubleEdge0 = false, doubleEdge1 = false, doubleEdge2 = false, doubleEdge3 = false;
         boolean upLeft, upRight, downLeft, downRight;
         int cnt;
-//        System.out.println("currentNode: " + Game.nodeX.get(Game.currentNode) + " " + Game.nodeY.get(Game.currentNode));
-//        System.out.println("father:      " + Game.nodeX.get(Game.father.get(Game.currentNode)) + " " + Game.nodeY.get(Game.father.get(Game.currentNode)));
-//        System.out.println(" ");
 
-        if ((int) Game.father.get(Game.currentNode) == (int) Game.currentNode) return; // in starting node
+        if ((int) Game.father.get(Game.currentNode) == (int) Game.currentNode) {
+            Game.isRunning = false;
+            
+            //
+            int repeat = 0;
+            int cover = 0;
+            int sum = 64;
+            for(int i = 1; i < 9; ++i)
+                for(int j = 1; j < 9; ++j) {
+                    for(int k = 0; k < Game.cellX.size(); ++k)
+                        if ((Game.cellX.get(k) == i*60 + 20) && (Game.cellY.get(k) == j*60 + 20)) {
+                            cover++;
+                            break;
+                        }
+                }
+            
+            for (Entity e: Game.floor.getEntities())
+                if (e instanceof Box) sum--;
+            
+            repeat = Game.cellX.size() - cover - 1;
+            //
+            JPanel panel = new JPanel();
+            panel.setSize(300, 100);
+            panel.setLocation(0, 0);
+            panel.setLayout(new FlowLayout());
+            
+            JLabel label1 = new JLabel();
+            label1.setText("ĐỘ BAO PHỦ:     " + cover + " / " + sum + "    ( " + Math.floor(((float) cover / sum)*100) + "% )");
+            JLabel label2 = new JLabel();
+            label2.setText("ĐỘ LẶP:         " + repeat + " / " + cover + "    ( " + Math.floor(((float) repeat / cover)*100) + "% )");
+            
+            panel.add(label1);
+            panel.add(label2);
+            
+            Display.resultFrame.add(panel);
+            Display.resultFrame.setVisible(true);
+            
+            return;
+        } // in starting node
         
         /////////////////////////////////////////// check double edge /////////////////////////////////////////////////////////
         upLeft = upRight = downLeft = downRight = true;
         // check doubleEdge down
         if ((int) Game.nodeY.get(Game.currentNode) < 500) {
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) + 60)) upLeft = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) + 60)) upRight = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) + 120)) downLeft = false;
@@ -239,7 +285,7 @@ public class MainController {
         upLeft = upRight = downLeft = downRight = true;
         if ((int) Game.nodeX.get(Game.currentNode) > 140) {
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 180) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 60)) upLeft = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 120) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 60)) upRight = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 180) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
@@ -261,7 +307,7 @@ public class MainController {
         upLeft = upRight = downLeft = downRight = true;
         if ((int) Game.nodeY.get(Game.currentNode) > 140) {
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 180)) upLeft = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 180)) upRight = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 120)) downLeft = false;
@@ -283,7 +329,7 @@ public class MainController {
         upLeft = upRight = downLeft = downRight = true;
         if ((int) Game.nodeX.get(Game.currentNode) < 500) {
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) + 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 60)) upLeft = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) + 120) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode) - 60)) upRight = false;
                     if ((e.getX() - 2 == (int) Game.nodeX.get(Game.currentNode) + 60) && (e.getY() - 2 == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
@@ -325,7 +371,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -353,7 +399,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -382,7 +428,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -413,7 +459,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -441,7 +487,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -470,7 +516,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -505,7 +551,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -533,7 +579,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -562,7 +608,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -593,7 +639,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -621,7 +667,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -650,7 +696,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -685,7 +731,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -713,7 +759,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -742,7 +788,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -773,7 +819,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                            if (!(e instanceof Dirty)) {
+                            if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -801,7 +847,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -830,7 +876,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -864,7 +910,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -892,7 +938,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -921,7 +967,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -951,7 +997,7 @@ public class MainController {
                     r = 1;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -979,7 +1025,7 @@ public class MainController {
                     r = 2;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -1008,7 +1054,7 @@ public class MainController {
                     r = 3;
                     c1 = c2 = c3 = c4 = c5 = c6 = 0;
                     for(Entity e: Game.floor.getEntities()) {
-                        if (!(e instanceof Dirty)) {
+                        if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                             if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -1055,7 +1101,7 @@ public class MainController {
             
             c1 = c2 = c3 = c4 = c5 = c6 = 0;
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -1089,7 +1135,7 @@ public class MainController {
             
             c1 = c2 = c3 = c4 = c5 = c6 = 0;
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c2 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c3 = 1;
@@ -1123,7 +1169,7 @@ public class MainController {
             
             c1 = c2 = c3 = c4 = c5 = c6 = 0;
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c1 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;
@@ -1157,7 +1203,7 @@ public class MainController {
 
             c1 = c2 = c3 = c4 = c5 = c6 = 0;
             for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty)) {
+                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c1 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode) - 60) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode))) c2 = 1;
                     if ((e.getX() - 2 == Game.nodeX.get(Game.currentNode)) && (e.getY() - 2 == Game.nodeY.get(Game.currentNode) - 60)) c3 = 1;

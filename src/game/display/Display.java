@@ -38,12 +38,12 @@ import javax.swing.JPanel;
  * @author 8TITTIT8
  */
 public class Display {
-    private JFrame frame;
+    public static JFrame frame, resultFrame;
     private paintJPanel upRightPanel, rightPanel, downRightPanel;
     private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, dirtyButton;
     private String title;
     private int frameWidth, frameHeight, canvasWidth, canvasHeight;
-    private Canvas canvas;
+    public static Canvas canvas;
     private Game game;
     private boolean firstRun = true;
     
@@ -54,6 +54,7 @@ public class Display {
         this.canvasHeight = 600;
         this.title = title;
         this.frame = new JFrame(this.title);
+        this.resultFrame = new JFrame("Result");
         this.rightPanel = new paintJPanel();
         this.upRightPanel = new paintJPanel();
         this.downRightPanel = new paintJPanel();
@@ -127,6 +128,12 @@ public class Display {
         
         frame.add(canvas);
         frame.setVisible(true);
+        //
+        resultFrame.setSize(300, 100);
+        resultFrame.setResizable(false);
+        resultFrame.setLocationRelativeTo(null);
+        resultFrame.setLayout(null);
+        resultFrame.setVisible(false);
         
         // set to game
         this.game.setCanvas(canvas);
@@ -148,7 +155,7 @@ public class Display {
                     MainController.makeFirstNode();
                     firstRun = false;
                 }
-                game.setIsRunning(true);
+                Game.isRunning = true;
             }
         });
     }
@@ -160,7 +167,7 @@ public class Display {
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                game.setIsRunning(false);
+                Game.isRunning = false;
             }
         });
     }
@@ -186,6 +193,15 @@ public class Display {
                 Game.robot.setIsRunning(false);
                 Game.robot.setIsSpinning(false);
                 Game.currentAction = -1000000000;
+                Game.isRunning = false;
+                
+                resultFrame = new JFrame("Result");
+                resultFrame.setSize(300, 100);
+                resultFrame.setResizable(false);
+                resultFrame.setLocationRelativeTo(null);
+                resultFrame.setLayout(null);
+                resultFrame.setVisible(false);
+                
                 firstRun = true;
             }
         });

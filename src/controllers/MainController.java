@@ -76,6 +76,32 @@ public class MainController {
         }
     }
     
+    public static void readDirtyKnowledge() {
+        FileInputStream fi;
+        try {
+            File directory = new File("");
+            String path = directory.getAbsolutePath() + "\\src\\Knowledge\\knowledge3.txt";
+            fi = new FileInputStream(path);
+            Scanner inp = new Scanner(fi,"UTF-8");
+            
+            // read array
+            while (inp.hasNextLine()) {
+                String temp = inp.nextLine(); 
+                String [] item = temp.split(" ");
+                int [] e = new int[item.length];
+                for(int i = 0; i < item.length; ++i)
+                    e[i] = Integer.parseInt(item[i]);
+                
+                Game.dirtyType.add(e[0]);
+                Game.cleanAction.add(e[1]);
+            }
+            inp.close();
+            
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MainController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public static boolean collision(int x1, int y1, int x2, int y2) {
         if ((x1 == x2) && (y1 < y2) && (y1 + 60 > y2)) return true;
         if ((x1 == x2) && (y2 < y1) && (y2 + 60 > y1)) return true;

@@ -36,6 +36,8 @@ public class Game implements Runnable {
     public static ArrayList<Integer> root;
     public static ArrayList<Integer> cellX;
     public static ArrayList<Integer> cellY;
+    public static ArrayList<Integer> cleanAction = new ArrayList<>();
+    public static ArrayList<Integer> dirtyType = new ArrayList<>();
     public static int[][][][][][][][] status = new int[7][4][2][2][2][2][2][2];
     public static ArrayList<int[]> movement = new ArrayList<>();
     public static Floor floor;
@@ -137,13 +139,13 @@ public class Game implements Runnable {
                     for (Entity e : this.floor.getEntities()) {
                         if (e instanceof Water)
                             if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
-                                this.robot.setIsSpinning(1);
+                                this.robot.setIsSpinning(Game.cleanAction.get(Game.dirtyType.indexOf((Integer) 1)));
                                 this.floor.getEntities().remove(e);
                                 break;
                             }
                         if (e instanceof Dust)
                             if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
-                                this.robot.setIsSpinning(2);
+                                this.robot.setIsSpinning(Game.cleanAction.get(Game.dirtyType.indexOf((Integer) 2)));
                                 this.floor.getEntities().remove(e);
                                 break;
                             }

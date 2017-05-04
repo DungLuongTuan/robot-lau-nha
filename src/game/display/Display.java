@@ -72,6 +72,7 @@ public class Display {
         Game.cellX = new ArrayList<>();
         Game.cellY = new ArrayList<>();
         MainController.readKnowledge();
+        MainController.readDirtyKnowledge();
         
         createDisplay();
     }

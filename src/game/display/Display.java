@@ -8,10 +8,12 @@ package game.display;
 import Main.Assets;
 import Main.Box;
 import Main.Dirty;
+import Main.Dust;
 import Main.Floor;
 import Main.Game;
 import Main.Robot;
 import Main.RunObstacle;
+import Main.Water;
 import Main.paintJPanel;
 import controllers.MainController;
 import java.awt.Canvas;
@@ -40,7 +42,7 @@ import javax.swing.JPanel;
 public class Display {
     public static JFrame frame, resultFrame;
     private paintJPanel upRightPanel, rightPanel, downRightPanel;
-    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, dirtyButton;
+    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, waterButton, dustButton;
     private String title;
     private int frameWidth, frameHeight, canvasWidth, canvasHeight;
     public static Canvas canvas;
@@ -114,7 +116,8 @@ public class Display {
         createRobotButton();
         createRunObstacleButton();
         createFixedObstacleButton();
-        createDirtyButton();
+        createWaterButton();
+        createDustButton();
         
         rightPanel.add(downRightPanel);
         rightPanel.add(upRightPanel);
@@ -191,7 +194,7 @@ public class Display {
                 Game.robot = new Robot(-100, -100);
                 Game.robot.setIsDoing(false);
                 Game.robot.setIsRunning(false);
-                Game.robot.setIsSpinning(false);
+                Game.robot.setIsSpinning(0);
                 Game.currentAction = -1000000000;
                 Game.isRunning = false;
                 
@@ -316,12 +319,12 @@ public class Display {
         });
     }
     
-    public void createDirtyButton() {
-        dirtyButton = new JButton();
-        dirtyButton.setBounds(112, 100, 56, 56);
-        dirtyButton.setIcon(new ImageIcon(Assets.dirty));
-        downRightPanel.add(dirtyButton);
-        dirtyButton.addMouseListener(new MouseListener() {
+    public void createWaterButton() {
+        waterButton = new JButton();
+        waterButton.setBounds(112, 100, 56, 56);
+        waterButton.setIcon(new ImageIcon(Assets.water));
+        downRightPanel.add(waterButton);
+        waterButton.addMouseListener(new MouseListener() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 
@@ -335,14 +338,57 @@ public class Display {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if ((e.getPoint().x >= -702 && e.getPoint().x <= -222) && (e.getPoint().y >= -350  && e.getPoint().y <= 130)) {
-                    Dirty dirty = new Dirty(0, 0);
+                    Water water = new Water(0, 0);
                     int x = 762 + e.getPoint().x + 20;
                     int y = 410 + e.getPoint().y + 20;
                     x = (x - 20) / 60;
                     y = (y - 20) / 60;
-                    dirty.setX(x*60 + 20 + 5);
-                    dirty.setY(y*60 + 20 + 5);
-                    Game.floor.addEntity(dirty);
+                    water.setX(x*60 + 20 + 5);
+                    water.setY(y*60 + 20 + 5);
+                    Game.floor.addEntity(water);
+                }
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                
+            }
+            
+        });
+    }
+    
+    public void createDustButton() {
+        dustButton = new JButton();
+        dustButton.setBounds(10, 100, 56, 56);
+        dustButton.setIcon(new ImageIcon(Assets.dust));
+        downRightPanel.add(dustButton);
+        dustButton.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+               
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if ((e.getPoint().x >= -600 && e.getPoint().x <= -120) && (e.getPoint().y >= -350  && e.getPoint().y <= 130)) {
+                    Dust dust = new Dust(0, 0);
+                    int x = 660 + e.getPoint().x + 20;
+                    int y = 410 + e.getPoint().y + 20;
+                    x = (x - 20) / 60;
+                    y = (y - 20) / 60;
+                    dust.setX(x*60 + 20 + 5);
+                    dust.setY(y*60 + 20 + 5);
+                    Game.floor.addEntity(dust);
                 }
             }
 

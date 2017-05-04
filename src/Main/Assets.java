@@ -14,7 +14,7 @@ import java.io.File;
  * @author 8TITTIT8
  */
 public class Assets {
-    public static BufferedImage background, robot, runObstacle, box, brick, menuBackground, upBackground, downBackground, button, sparkle, sparkle1, sparkle2, dirty;
+    public static BufferedImage background, robot, runObstacle, box, brick, menuBackground, upBackground, downBackground, button, sparkle, sparkle1, sparkle2, water, dust;
     
     public static void init() {
         File directory = new File("");
@@ -30,7 +30,8 @@ public class Assets {
         String sparkleName = directory.getAbsolutePath() + "\\src\\Image\\sparkle2.png";
         String sparkle1Name = directory.getAbsolutePath() + "\\src\\Image\\sparkle3.png";
         String sparkle2Name = directory.getAbsolutePath() + "\\src\\Image\\sparkle4.png";
-        String dirtyName = directory.getAbsolutePath() + "\\src\\Image\\dirty.png";
+        String waterName = directory.getAbsolutePath() + "\\src\\Image\\water.png";
+        String dustName = directory.getAbsolutePath() + "\\src\\Image\\dust.png";
         
         background = MainController.loadImage(backgroundName);
         robot = MainController.loadImage(robotName);
@@ -44,6 +45,7 @@ public class Assets {
         sparkle = MainController.loadImage(sparkleName);
         sparkle1 = MainController.loadImage(sparkle1Name);
         sparkle2 = MainController.loadImage(sparkle2Name);
-        dirty = MainController.loadImage(dirtyName);
+        water = MainController.loadImage(waterName);
+        dust = MainController.loadImage(dustName);
     }
 }

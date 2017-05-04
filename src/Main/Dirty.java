@@ -11,25 +11,9 @@ import java.awt.Graphics;
  *
  * @author 8TITTIT8
  */
-public class Dirty extends FixedObstacle{
+public abstract class Dirty extends FixedObstacle{
     
     public Dirty(int x, int y) {
         super(x, y);
     }
-    
-    @Override
-    public void updateRotation() {
-        
-    }
-    
-    @Override
-    public void updateRunning() {
-        
-    }
-    
-    @Override
-    public void render(Graphics g) {
-        g.drawImage(Assets.dirty, super.getX(), super.getY(), null);
-    }
-    
 }

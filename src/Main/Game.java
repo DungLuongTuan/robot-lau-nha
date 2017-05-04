@@ -131,18 +131,25 @@ public class Game implements Runnable {
             if (this.robot != null && this.currentAction != -1000000000) {
                 if (this.robot.getIsDoing()) this.robot.updateRotation();
                 if (this.robot.getIsRunning()) this.robot.updateRunning();
-                if (this.robot.getIsSpinning()) this.robot.updateSpinning();
+                if (this.robot.getIsSpinning() != 0) this.robot.updateSpinning();
                 if (!this.robot.getIsDoing() && !this.robot.getIsRunning()) {
                     
-                    for (Entity e : this.floor.getEntities())
-                        if (e instanceof Dirty)
+                    for (Entity e : this.floor.getEntities()) {
+                        if (e instanceof Water)
                             if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
-                                this.robot.setIsSpinning(true);
+                                this.robot.setIsSpinning(1);
                                 this.floor.getEntities().remove(e);
                                 break;
                             }
+                        if (e instanceof Dust)
+                            if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
+                                this.robot.setIsSpinning(2);
+                                this.floor.getEntities().remove(e);
+                                break;
+                            }
+                    }
                     
-                    if (!this.robot.getIsSpinning()) {
+                    if (this.robot.getIsSpinning() == 0) {
                         if (this.currentAction == actionClone.size() - 1) MainController.nextStep();
                         else {
                             this.currentAction++;

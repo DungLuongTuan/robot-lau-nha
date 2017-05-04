@@ -22,7 +22,7 @@ public class Robot extends Entity{
     private int angle = 0;
     private boolean isRunning;
     private boolean isDoing;
-    private boolean isSpinning;
+    private int isSpinning;
     
     public Robot(int x, int y) {
         super(x, y);
@@ -99,7 +99,7 @@ public class Robot extends Entity{
             if (Game.action.get(Game.currentAction) == 3) goalAngle = 0;
         }
         if (goalAngle == this.angle) {
-            this.isSpinning = false;
+            if (this.isSpinning > 0) this.isSpinning--;
         }
     }
     
@@ -206,11 +206,11 @@ public class Robot extends Entity{
         this.isDoing = isDoing;
     }
 
-    public boolean getIsSpinning() {
+    public int getIsSpinning() {
         return isSpinning;
     }
 
-    public void setIsSpinning(boolean isSpinning) {
+    public void setIsSpinning(int isSpinning) {
         this.isSpinning = isSpinning;
     }
 

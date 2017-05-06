@@ -110,33 +110,33 @@ public class Robot extends Entity{
         
         if (this.angle == 0) {
             super.setY(super.getY() + 1);
-            if ((super.getY() - 22) % 60 == 0) {
-                Game.cellX.add(super.getX() - 2);
-                Game.cellY.add(super.getY() - 2);
+            if (((int) (super.getY() - 20 - (Game.sizeCell - Game.sizeObject)/2)) % (int) Game.sizeCell == 0) {
+                Game.cellX.add((int) (super.getX() - (Game.sizeCell - Game.sizeObject)/2));
+                Game.cellY.add((int) (super.getY() - (Game.sizeCell - Game.sizeObject)/2));
                 this.isRunning = false;
             }
         }
         if (this.angle == 90) {
             super.setX(super.getX() - 1);
-            if ((super.getX() - 22) % 60 == 0) {
-                Game.cellX.add(super.getX() - 2);
-                Game.cellY.add(super.getY() - 2);
+            if (((int) (super.getX() - 20 - (Game.sizeCell - Game.sizeObject)/2)) % (int) Game.sizeCell == 0) {
+                Game.cellX.add((int) (super.getX() - (Game.sizeCell - Game.sizeObject)/2));
+                Game.cellY.add((int) (super.getY() - (Game.sizeCell - Game.sizeObject)/2));
                 this.isRunning = false;
             }
         }
         if (this.angle == 180) {
             super.setY(super.getY() - 1);
-            if ((super.getY() - 22) % 60 == 0) {
-                Game.cellX.add(super.getX() - 2);
-                Game.cellY.add(super.getY() - 2);
+            if (((int) (super.getY() - 20 - (Game.sizeCell - Game.sizeObject)/2)) % (int) Game.sizeCell == 0) {
+                Game.cellX.add((int) (super.getX() - (Game.sizeCell - Game.sizeObject)/2));
+                Game.cellY.add((int) (super.getY() - (Game.sizeCell - Game.sizeObject)/2));
                 this.isRunning = false;
             }
         }
         if (this.angle == 270) {
             super.setX(super.getX() + 1);
-            if ((super.getX() - 22) % 60 == 0) {
-                Game.cellX.add(super.getX() - 2);
-                Game.cellY.add(super.getY() - 2);
+            if (((int) (super.getX() - 20 - (Game.sizeCell - Game.sizeObject)/2)) % (int) Game.sizeCell == 0) {
+                Game.cellX.add((int) (super.getX() - (Game.sizeCell - Game.sizeObject)/2));
+                Game.cellY.add((int) (super.getY() - (Game.sizeCell - Game.sizeObject)/2));
                 this.isRunning = false;
             }
         }
@@ -145,6 +145,20 @@ public class Robot extends Entity{
     
     @Override
     public void render (Graphics g) {
+//        Graphics2D g2 = (Graphics2D) g;
+//        g2.setColor(Color.YELLOW);
+//        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 0.6));
+//        
+//        //
+//        AffineTransform backup = g2.getTransform();
+//        AffineTransform trans = new AffineTransform();
+//        trans.rotate(Math.toRadians(this.angle), super.getX() + 28, super.getY() + 28);
+//        g2.transform(trans);
+//        g2.fillArc(super.getX() + 28 - 80, super.getY() + 28 - 80, 160, 160, 150, 240);
+//        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 1));
+//        g2.drawImage(Scalr.resize(Assets.robot, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), super.getX(), super.getY(), null);
+//        g2.setTransform(backup);
+
         Graphics2D g2 = (Graphics2D) g;
         g2.setColor(Color.YELLOW);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 0.6));
@@ -152,11 +166,11 @@ public class Robot extends Entity{
         //
         AffineTransform backup = g2.getTransform();
         AffineTransform trans = new AffineTransform();
-        trans.rotate(Math.toRadians(this.angle), super.getX() + 28, super.getY() + 28);
+        trans.rotate(Math.toRadians(this.angle), super.getX() + (int) (Game.sizeObject/2), super.getY() + (int) (Game.sizeObject/2));
         g2.transform(trans);
-        g2.fillArc(super.getX() + 28 - 80, super.getY() + 28 - 80, 160, 160, 150, 240);
+        g2.fillArc(super.getX() + (int) (Game.sizeObject/2) - (int) (80*10/Game.sizeMap), super.getY() + (int) (Game.sizeObject/2) - (int) (80*10/Game.sizeMap), (int) (160*10/Game.sizeMap), (int) (160*10/Game.sizeMap), 150, 240);
         g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) 1));
-        g2.drawImage(Assets.robot, super.getX(), super.getY(), null);
+        g2.drawImage(Scalr.resize(Assets.robot, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), super.getX(), super.getY(), null);
         g2.setTransform(backup);
         
     } 

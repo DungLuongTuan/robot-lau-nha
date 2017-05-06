@@ -27,6 +27,6 @@ public class Dust extends Dirty {
 
     @Override
     public void render(Graphics g) {
-        g.drawImage(Assets.dust, super.getX(), super.getY(), null);
+        g.drawImage(Scalr.resize(Assets.dust, Scalr.Method.BALANCED, (int) Game.sizeDirty, (int) Game.sizeDirty), super.getX(), super.getY(), null);
     }
 }

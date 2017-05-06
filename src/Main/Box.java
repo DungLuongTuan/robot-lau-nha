@@ -28,6 +28,6 @@ public class Box extends FixedObstacle {
     
     @Override
     public void render(Graphics g) {
-        g.drawImage(Assets.box, super.getX(), super.getY(), null);
+        g.drawImage(Scalr.resize(Assets.box, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), super.getX(), super.getY(), null);
     }
 }

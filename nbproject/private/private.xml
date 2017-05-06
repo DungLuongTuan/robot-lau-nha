@@ -5,6 +5,7 @@
         <group>
             <file>file:/E:/robot/TitleGame/src/Main/Robot.java</file>
             <file>file:/E:/robot/TitleGame/src/controllers/MainController.java</file>
+            <file>file:/E:/robot/TitleGame/src/Main/Box.java</file>
             <file>file:/E:/robot/TitleGame/src/game/display/Display.java</file>
             <file>file:/E:/robot/TitleGame/src/Main/Game.java</file>
         </group>

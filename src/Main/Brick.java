@@ -28,6 +28,6 @@ public class Brick extends FixedObstacle {
     
     @Override
     public void render(Graphics g) {
-        g.drawImage(Assets.brick, super.getX(), super.getY(), null);
+        g.drawImage(Scalr.resize(Assets.brick, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), super.getX(), super.getY(), null);
     }
 }

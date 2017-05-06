@@ -34,15 +34,18 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *
  * @author 8TITTIT8
  */
+
 public class Display {
     public static JFrame frame, resultFrame;
+    public static JTextField sizeMapField;
     private paintJPanel upRightPanel, rightPanel, downRightPanel;
-    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, waterButton, dustButton;
+    private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, waterButton, dustButton, changeMapButton;
     private String title;
     private int frameWidth, frameHeight, canvasWidth, canvasHeight;
     public static Canvas canvas;
@@ -57,11 +60,12 @@ public class Display {
         this.title = title;
         this.frame = new JFrame(this.title);
         this.resultFrame = new JFrame("Result");
+        this.sizeMapField = new JTextField();
         this.rightPanel = new paintJPanel();
         this.upRightPanel = new paintJPanel();
         this.downRightPanel = new paintJPanel();
         this.game = new Game("Hello!");
-        Game.robot = new Robot(-100, -100);
+        Game.robot = new Robot(-1000, -1000);
         Game.floor = new Floor();
         Game.node = new ArrayList<>();
         Game.father = new ArrayList<>();
@@ -119,6 +123,11 @@ public class Display {
         createFixedObstacleButton();
         createWaterButton();
         createDustButton();
+        createChangeMapButton();
+        
+        sizeMapField.setSize(100, 20);
+        sizeMapField.setLocation(10, 200);
+        downRightPanel.add(sizeMapField);
         
         rightPanel.add(downRightPanel);
         rightPanel.add(upRightPanel);
@@ -183,6 +192,11 @@ public class Display {
         resetButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                Game.sizeMap = 10;
+                Game.sizeCell = 60;
+                Game.sizeDirty = 50;
+                Game.sizeObject = 56;
+                
                 Game.floor = new Floor();
                 Game.node = new ArrayList<>();
                 Game.father = new ArrayList<>();
@@ -221,25 +235,29 @@ public class Display {
             public void mouseClicked(MouseEvent e) {}
 
             @Override
-            public void mousePressed(MouseEvent e) {}
+            public void mousePressed(MouseEvent e) {
+                //System.out.println(Game.sizeCell + " " + Game.sizeDirty + " " + Game.sizeObject + " " + Game.sizeMap);
+            }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((e.getPoint().x >= -600 && e.getPoint().x <= -120) && (e.getPoint().y >= -260  && e.getPoint().y <= 220)) {
-                    int x = 660 + e.getPoint().x + 20;
-                    int y = 320 + e.getPoint().y + 20;
-                    x = (x - 20) / 60;
-                    y = (y - 20) / 60;
-                    Game.robot.setX(x*60 + 20 + 2);
-                    Game.robot.setY(y*60 + 20 + 2);
+                int x0 = -680;
+                int y0 = -340;
+                if ((e.getPoint().x >= x0 + 20 + Game.sizeCell && e.getPoint().x <= x0 + 20 + Game.sizeCell*(Game.sizeMap - 1)) && (e.getPoint().y >= y0 + 20 + Game.sizeCell  && e.getPoint().y <= y0 + 20 + Game.sizeCell*(Game.sizeMap - 1))) {
+                    int x = -x0 + e.getPoint().x;
+                    int y = -y0 + e.getPoint().y;
+                    x = (int) ((x - 20) / Game.sizeCell);
+                    y = (int) ((y - 20) / Game.sizeCell);
+                    Game.robot.setX((int) (x*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
+                    Game.robot.setY((int) (y*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
                     Game.robot.setIsDoing(false);
                     Game.robot.setIsRunning(false);
                     Game.node.add(Game.node.size());
                     Game.father.add(0);
-                    Game.nodeX.add(x*60 + 20);
-                    Game.nodeY.add(y*60 + 20);
-                    Game.cellX.add(x*60 + 20);
-                    Game.cellY.add(y*60 + 20);
+                    Game.nodeX.add((int) (x*Game.sizeCell + 20));
+                    Game.nodeY.add((int) (y*Game.sizeCell + 20));
+                    Game.cellX.add((int) (x*Game.sizeCell + 20));
+                    Game.cellY.add((int) (y*Game.sizeCell + 20));
                     Game.currentNode = Game.node.size() - 1;
                 }
             }
@@ -266,14 +284,16 @@ public class Display {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((e.getPoint().x >= -804 && e.getPoint().x <= -324) && (e.getPoint().y >= -260  && e.getPoint().y <= 220)) {
+                int x0 = -884;
+                int y0 = -340;
+                if ((e.getPoint().x >= x0 + 20 + Game.sizeCell && e.getPoint().x <= x0 + 20 + Game.sizeCell*(Game.sizeMap - 1)) && (e.getPoint().y >= y0 + 20 + Game.sizeCell  && e.getPoint().y <= y0 + 20 + Game.sizeCell*(Game.sizeMap - 1))) {
                     RunObstacle runObstacle = new RunObstacle(0, 0);
-                    int x = 864 + e.getPoint().x + 20;
-                    int y = 320 + e.getPoint().y + 20;
-                    x = (x - 20) / 60;
-                    y = (y - 20) / 60;
-                    runObstacle.setX(x*60 + 20 + 2);
-                    runObstacle.setY(y*60 + 20 + 2);
+                    int x = -x0 + e.getPoint().x;
+                    int y = -y0 + e.getPoint().y;
+                    x = (int) ((x - 20) / Game.sizeCell);
+                    y = (int) ((y - 20) / Game.sizeCell);
+                    runObstacle.setX((int) (x*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
+                    runObstacle.setY((int) (y*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
                     Game.floor.addEntity(runObstacle);
                 }
             }
@@ -300,14 +320,16 @@ public class Display {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((e.getPoint().x >= -702 && e.getPoint().x <= -222) && (e.getPoint().y >= -260  && e.getPoint().y <= 220)) {
+                int x0 = -782;
+                int y0 = -340;
+                if ((e.getPoint().x >= x0 + 20 + Game.sizeCell && e.getPoint().x <= x0 + 20 + Game.sizeCell*(Game.sizeMap - 1)) && (e.getPoint().y >= y0 + 20 + Game.sizeCell  && e.getPoint().y <= y0 + 20 + Game.sizeCell*(Game.sizeMap - 1))) {
                     Box box = new Box(0, 0);
-                    int x = 762 + e.getPoint().x + 20;
-                    int y = 320 + e.getPoint().y + 20;
-                    x = (x - 20) / 60;
-                    y = (y - 20) / 60;
-                    box.setX(x*60 + 20 + 2);
-                    box.setY(y*60 + 20 + 2);
+                    int x = -x0 + e.getPoint().x;
+                    int y = -y0 + e.getPoint().y;
+                    x = (int) ((x - 20) / Game.sizeCell);
+                    y = (int) ((y - 20) / Game.sizeCell);
+                    box.setX((int) (x*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
+                    box.setY((int) (y*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
                     Game.floor.addEntity(box);
                 }
             }
@@ -338,14 +360,16 @@ public class Display {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((e.getPoint().x >= -702 && e.getPoint().x <= -222) && (e.getPoint().y >= -350  && e.getPoint().y <= 130)) {
+                int x0 = -782;
+                int y0 = -430;
+                if ((e.getPoint().x >= x0 + 20 + Game.sizeCell && e.getPoint().x <= x0 + 20 + Game.sizeCell*(Game.sizeMap - 1)) && (e.getPoint().y >= y0 + 20 + Game.sizeCell  && e.getPoint().y <= y0 + 20 + Game.sizeCell*(Game.sizeMap - 1))) {
                     Water water = new Water(0, 0);
-                    int x = 762 + e.getPoint().x + 20;
-                    int y = 410 + e.getPoint().y + 20;
-                    x = (x - 20) / 60;
-                    y = (y - 20) / 60;
-                    water.setX(x*60 + 20 + 5);
-                    water.setY(y*60 + 20 + 5);
+                    int x = -x0 + e.getPoint().x;
+                    int y = -y0 + e.getPoint().y;
+                    x = (int) ((x - 20) / Game.sizeCell);
+                    y = (int) ((y - 20) / Game.sizeCell);
+                    water.setX((int) (x*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeDirty)/2));
+                    water.setY((int) (y*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeDirty)/2));
                     Game.floor.addEntity(water);
                 }
             }
@@ -381,14 +405,16 @@ public class Display {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if ((e.getPoint().x >= -600 && e.getPoint().x <= -120) && (e.getPoint().y >= -350  && e.getPoint().y <= 130)) {
+                int x0 = -680;
+                int y0 = -430;
+                if ((e.getPoint().x >= x0 + 20 + Game.sizeCell && e.getPoint().x <= x0 + 20 + Game.sizeCell*(Game.sizeMap - 1)) && (e.getPoint().y >= y0 + 20 + Game.sizeCell  && e.getPoint().y <= y0 + 20 + Game.sizeCell*(Game.sizeMap - 1))) {
                     Dust dust = new Dust(0, 0);
-                    int x = 660 + e.getPoint().x + 20;
-                    int y = 410 + e.getPoint().y + 20;
-                    x = (x - 20) / 60;
-                    y = (y - 20) / 60;
-                    dust.setX(x*60 + 20 + 5);
-                    dust.setY(y*60 + 20 + 5);
+                    int x = -x0 + e.getPoint().x;
+                    int y = -y0 + e.getPoint().y;
+                    x = (int) ((x - 20) / Game.sizeCell);
+                    y = (int) ((y - 20) / Game.sizeCell);
+                    dust.setX((int) (x*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeDirty)/2));
+                    dust.setY((int) (y*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeDirty)/2));
                     Game.floor.addEntity(dust);
                 }
             }
@@ -405,4 +431,81 @@ public class Display {
             
         });
     }
+    
+    public void createChangeMapButton() {
+        JButton changeMapButton = new JButton("Change map!!!");
+        changeMapButton.setBounds(140, 200, 130, 20);
+        downRightPanel.add(changeMapButton);
+        changeMapButton.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (!Game.isRunning) {
+                    try {
+                        int size = Integer.parseInt((sizeMapField.getText()));
+                        //reset map
+                        Game.sizeMap = 10;
+                        Game.sizeCell = 60;
+                        Game.sizeDirty = 50;
+                        Game.sizeObject = 56;
+
+                        // new map
+                        Game.sizeMap = size;
+                        Game.sizeCell = (Game.sizeCell*10/Game.sizeMap);
+                        Game.sizeDirty = (Game.sizeDirty*10/Game.sizeMap);
+                        Game.sizeObject = (Game.sizeObject*10/Game.sizeMap);
+
+                        // do as reset button
+                        Game.floor = new Floor();
+                        Game.node = new ArrayList<>();
+                        Game.father = new ArrayList<>();
+                        Game.nodeX = new ArrayList<>();
+                        Game.nodeY = new ArrayList<>();
+                        Game.action = new ArrayList<>();
+                        Game.root = new ArrayList<>();
+                        Game.cellX = new ArrayList<>();
+                        Game.cellY = new ArrayList<>();
+                        Game.robot = new Robot(-100, -100);
+                        Game.robot.setIsDoing(false);
+                        Game.robot.setIsRunning(false);
+                        Game.robot.setIsSpinning(0);
+                        Game.currentAction = -1000000000;
+                        Game.isRunning = false;
+
+                        resultFrame = new JFrame("Result");
+                        resultFrame.setSize(300, 100);
+                        resultFrame.setResizable(false);
+                        resultFrame.setLocationRelativeTo(null);
+                        resultFrame.setLayout(null);
+                        resultFrame.setVisible(false);
+
+                        firstRun = true;
+                    }
+                    catch (NumberFormatException ex) {
+                        
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                
+            }
+        });
+    }
 }
+

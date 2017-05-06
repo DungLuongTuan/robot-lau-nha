@@ -47,5 +47,7 @@ public class Assets {
         sparkle2 = MainController.loadImage(sparkle2Name);
         water = MainController.loadImage(waterName);
         dust = MainController.loadImage(dustName);
+        
+//        brick = Scalr.resize(MainController.loadImage(brickName), Scalr.Method.BALANCED, 28, 28);
     }
 }

@@ -17,16 +17,16 @@ public class Floor {
     
     public Floor() {
         Brick brick;
-        for(int i = 0; i < 10; ++i){
-            brick = new Brick(20 + 2, i*60 + 20 + 2);
+        for(int i = 0; i < Game.sizeMap; ++i){
+            brick = new Brick((int) (20 + (Game.sizeCell - Game.sizeObject)/2),(int) (i*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
             this.Entities.add(brick);
-            brick = new Brick(560 + 2, i*60 + 20 + 2);
+            brick = new Brick((int) (20 + Game.sizeCell*(Game.sizeMap - 1) + (Game.sizeCell - Game.sizeObject)/2), (int) (i*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2));
             this.Entities.add(brick);
         }
-        for(int i = 1; i < 9; ++i) {
-            brick = new Brick(i*60 + 20 + 2, 20 + 2);
+        for(int i = 1; i < Game.sizeMap - 1; ++i) {
+            brick = new Brick((int) (i*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2), (int) (20 + (Game.sizeCell - Game.sizeObject)/2));
             this.Entities.add(brick);
-            brick = new Brick(i*60 + 20 + 2, 560 + 2);
+            brick = new Brick((int) (i*Game.sizeCell + 20 + (Game.sizeCell - Game.sizeObject)/2), (int) (20 + Game.sizeCell*(Game.sizeMap - 1) + (Game.sizeCell - Game.sizeObject)/2));
             this.Entities.add(brick);
         }
     }

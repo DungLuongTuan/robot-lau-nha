@@ -46,6 +46,13 @@ public class Game implements Runnable {
     public static int currentAction = -1000000000;
     public static boolean isRunning = false;
     
+    // resizeable map
+    public static int sizeMap = 10;
+    public static int sizeCell = 60;
+    public static int sizeDirty = 50;
+    public static int sizeObject = 56;
+    
+    
     private int width;
     private int height;
     private String title;
@@ -86,41 +93,22 @@ public class Game implements Runnable {
                                     if (((RunObstacle) e).getVelX() == 0) ((RunObstacle) e).setVelY(((RunObstacle) e).getVelY() * -1);
                                     else ((RunObstacle) e).setVelY(0);
                                 }
-                                
+
                                 if (((RunObstacle) e).getVelY() == 0) {
                                     ((RunObstacle) e).setVelY(rand.nextInt(3) - 1);
                                     if (((RunObstacle) e).getVelY() == 0) ((RunObstacle) e).setVelX(((RunObstacle) e).getVelX() * -1);
                                     else ((RunObstacle) e).setVelX(0);
                                 }
-                                System.out.println("11111");
-                                System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
-                                System.out.println(e1.getX() + " " + e1.getY());
+//                                System.out.println("11111");
+//                                System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
+//                                System.out.println(e1.getX() + " " + e1.getY());
                                 wallCollison = true;
                             }
-                    
-//                    if ((this.robot != null) && (this.robot.getIsRunning()))
-//                        if (MainController.collision(this.robot.getX(), this.robot.getY(), e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY())) {
-//                            if (((RunObstacle) e).getVelX() == 0) {
-//                                ((RunObstacle) e).setVelX(rand.nextInt(3) - 1);
-//                                if (((RunObstacle) e).getVelX() == 0) ((RunObstacle) e).setVelY(((RunObstacle) e).getVelY() * -1);
-//                                else ((RunObstacle) e).setVelY(0);
-//                            }
-//                                
-//                            if (((RunObstacle) e).getVelY() == 0) {
-//                                ((RunObstacle) e).setVelY(rand.nextInt(3) - 1);
-//                                if (((RunObstacle) e).getVelY() == 0) ((RunObstacle) e).setVelX(((RunObstacle) e).getVelX() * -1);
-//                                else ((RunObstacle) e).setVelX(0);
-//                            }
-//                            System.out.println("2222222");
-//                            System.out.println(e.getX() + " " + e.getY() + " " + ((RunObstacle) e).getVelX() + " " + ((RunObstacle) e).getVelY());
-//                            System.out.println(this.robot.getX() + " " + this.robot.getY());
-//                            return;
-//                        }
                     
                     if (this.robot != null)
                         if (MainController.collision(this.robot.getX() + this.robot.getVelX(), this.robot.getY() + this.robot.getVelY(), e.getX() + ((RunObstacle) e).getVelX(), e.getY() + ((RunObstacle) e).getVelY())) {
                             e.updateRunning();
-                            System.out.println("2222");
+//                            System.out.println("2222");
                             collision = true;
                             continue;
                         }
@@ -138,13 +126,13 @@ public class Game implements Runnable {
                     
                     for (Entity e : this.floor.getEntities()) {
                         if (e instanceof Water)
-                            if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
+                            if (((int) (e.getX() - (Game.sizeCell - Game.sizeDirty)/2) == (int) (this.robot.getX() - (Game.sizeCell - Game.sizeObject)/2)) && ((int) (e.getY() - (Game.sizeCell - Game.sizeDirty)/2) == (int) (this.robot.getY() - (Game.sizeCell - Game.sizeObject)/2))) {
                                 this.robot.setIsSpinning(Game.cleanAction.get(Game.dirtyType.indexOf((Integer) 1)));
                                 this.floor.getEntities().remove(e);
                                 break;
                             }
                         if (e instanceof Dust)
-                            if ((e.getX() - 5 == this.robot.getX() - 2) && (e.getY() - 5 == this.robot.getY() - 2)) {
+                            if (((int) (e.getX() - (Game.sizeCell - Game.sizeDirty)/2) == (int) (this.robot.getX() - (Game.sizeCell - Game.sizeObject)/2)) && ((int) (e.getY() - (Game.sizeCell - Game.sizeDirty)/2) == (int) (this.robot.getY() - (Game.sizeCell - Game.sizeObject)/2))) {
                                 this.robot.setIsSpinning(Game.cleanAction.get(Game.dirtyType.indexOf((Integer) 2)));
                                 this.floor.getEntities().remove(e);
                                 break;
@@ -169,41 +157,69 @@ public class Game implements Runnable {
             canvas.createBufferStrategy(3);
             return;
         }
+//        System.out.println(robot.getX() + " " + robot.getY() + " " + robot.getAngle() + " " + Game.sizeCell + " " + Game.sizeObject + " " + (int) (Game.sizeCell - Game.sizeObject)/2);
+        // make clone value
+        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
+        float cloneSizeCell = Game.sizeCell;
+        float cloneSizeDirty = Game.sizeDirty;
+        float cloneSizeObject = Game.sizeObject;
+        float cloneSizeMap = Game.sizeMap;
         
+        // make graphics
         g = bs.getDrawGraphics();
         Graphics2D g2 = (Graphics2D) g;
         //c clear screen
-        g.clearRect(0, 0, width, height);
+        g.clearRect(0, 0, 1000, 1000);
         
-        // draw 
-        ArrayList<Entity> cloneEntities = new ArrayList<>(this.floor.getEntities());
-        
-        g.drawImage(Assets.background, 20, 20, null);
+        // draw background        
+        g.setColor(new Color(168, 241, 247));
+        for(int i = 0; i < cloneSizeMap; ++i)
+            for(int j = 0; j < cloneSizeMap; ++j) {
+                g.fillRect((int) (20 + i*cloneSizeCell + (cloneSizeCell - cloneSizeObject)/2), (int) (20 + j*cloneSizeCell + (cloneSizeCell - cloneSizeObject)/2), (int) cloneSizeObject, (int) cloneSizeObject);
+            }
+        g.setColor(null);
+        //System.out.println(cloneSizeCell + " " + cloneSizeDirty + " " + cloneSizeObject + " " + cloneSizeMap);
+        //System.out.println(Game.sizeCell + " " + Game.sizeDirty + " " + Game.sizeObject + " " + Game.sizeMap);
+        // draw wall
         for(Entity e : cloneEntities)
             if (e instanceof Brick) e.render(g);
         
+        // draw pass cell
+//        this.sparkle = (this.sparkle + 1) % 120;
+//        for(int i = 0; i < Game.cellX.size(); ++i) {
+//            if (this.sparkle < 40) {
+//                g2.drawImage(Scalr.resize(Assets.sparkle, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), (int) (Game.cellX.get(i) + (Game.sizeCell - Game.sizeObject)/2), (int) (Game.cellY.get(i) + (Game.sizeCell - Game.sizeObject)/2), null);
+//                continue;
+//            }
+//            if (this.sparkle < 80) {
+//                g2.drawImage(Scalr.resize(Assets.sparkle1, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), (int) (Game.cellX.get(i) + (Game.sizeCell - Game.sizeObject)/2), (int) (Game.cellY.get(i) + (Game.sizeCell - Game.sizeObject)/2), null);
+//                continue;
+//            }
+//            g2.drawImage(Scalr.resize(Assets.sparkle2, Scalr.Method.BALANCED, (int) Game.sizeObject, (int) Game.sizeObject), (int) (Game.cellX.get(i) + (Game.sizeCell - Game.sizeObject)/2), (int) (Game.cellY.get(i) + (Game.sizeCell - Game.sizeObject)/2), null);
+//        }
+
+        boolean isRepeat;
+        for(int i = 0; i < Game.cellX.size(); ++i) {
+            isRepeat = false;
+            for(int j = i - 1; j >= 0; --j)
+                if (((int) Game.cellX.get(i) == (int) Game.cellX.get(j)) && ((int) Game.cellY.get(i) == (int) Game.cellY.get(j))) {
+                    isRepeat = true;
+                    break;
+                }
+            if (isRepeat) g.setColor(new Color(0, 140, 140));
+            else g.setColor(new Color(100, 200, 200));
+            
+            g.fillRect((int) (Game.cellX.get(i) + (Game.sizeCell - Game.sizeObject)/2), (int) (Game.cellY.get(i) + (Game.sizeCell - Game.sizeObject)/2), Game.sizeObject, Game.sizeObject);
+            
+            g.setColor(null);
+        }
         //draw spanning tree
         g.setColor(Color.RED);
         g2.setStroke(new BasicStroke(6));
         for(int i = 1; i < Game.node.size(); ++i) {
-            //System.out.println("coordinate: " + Game.nodeX.get(i) + " " + Game.nodeY.get(i) + " " + Game.nodeX.get(Game.father.get(i)) + " " + Game.nodeY.get(Game.father.get(i)));
             g2.drawLine(Game.nodeX.get(i), Game.nodeY.get(i), Game.nodeX.get(Game.father.get(i)), Game.nodeY.get(Game.father.get(i)));
         }
         g.setColor(null);
-        
-        // draw pass cell
-        this.sparkle = (this.sparkle + 1) % 120;
-        for(int i = 0; i < Game.cellX.size(); ++i) {
-            if (this.sparkle < 40) {
-                g2.drawImage(Assets.sparkle, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
-                continue;
-            }
-            if (this.sparkle < 80) {
-                g2.drawImage(Assets.sparkle1, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
-                continue;
-            }
-            g2.drawImage(Assets.sparkle2, Game.cellX.get(i) + 2, Game.cellY.get(i) + 2, null);
-        }
         
         // draw entities
         for(Entity e : cloneEntities)
@@ -223,7 +239,7 @@ public class Game implements Runnable {
     @Override
     public void run() {
         init();
-        int fps = 120;
+        int fps = 180;
         double timePerTick = 1000000000 / fps;
         double delta = 0;
         long now;

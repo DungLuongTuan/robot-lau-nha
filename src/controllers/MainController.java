@@ -8,6 +8,7 @@ package controllers;
 import Main.Box;
 import Main.Dirty;
 import Main.Entity;
+import Main.FixedObstacle;
 import Main.Game;
 import Main.RunObstacle;
 import game.display.Display;
@@ -1226,43 +1227,290 @@ public class MainController {
         }
         
         if ((int) Game.father.get(Game.currentNode) == (int) Game.currentNode) {
-            Game.isRunning = false;
             
-            //
-            int repeat = 0;
-            int cover = 0;
-            int sum = (sizeMap - 2)*(sizeMap - 2);
-            for(int i = 1; i < sizeMap - 1; ++i)
-                for(int j = 1; j < sizeMap - 1; ++j) {
-                    for(int k = 0; k < Game.cellX.size(); ++k)
-                        if ((Game.cellX.get(k) == i*sizeCell + 20) && (Game.cellY.get(k) == j*sizeCell + 20)) {
-                            cover++;
+            if ((Game.cellX.get(0) == Game.robot.getX() - brickBlank) && (Game.cellY.get(0) == Game.robot.getY() - brickBlank)) {
+                Game.isRunning = false;
+
+                //
+                int repeat = 0;
+                int cover = 0;
+                int sum = (sizeMap - 2)*(sizeMap - 2);
+                for(int i = 1; i < sizeMap - 1; ++i)
+                    for(int j = 1; j < sizeMap - 1; ++j) {
+                        for(int k = 0; k < Game.cellX.size(); ++k)
+                            if ((Game.cellX.get(k) == i*sizeCell + 20) && (Game.cellY.get(k) == j*sizeCell + 20)) {
+                                cover++;
+                                break;
+                            }
+                    }
+
+                for (Entity e: Game.floor.getEntities())
+                    if (e instanceof Box) sum--;
+
+                repeat = Game.cellX.size() - cover - 1;
+                //
+                JPanel panel = new JPanel();
+                panel.setSize(300, 100);
+                panel.setLocation(0, 0);
+                panel.setLayout(new FlowLayout());
+
+                JLabel label1 = new JLabel();
+                label1.setText("ĐỘ BAO PHỦ:     " + cover + " / " + sum + "    ( " + Math.floor(((float) cover / sum)*100) + "% )");
+                JLabel label2 = new JLabel();
+                label2.setText("ĐỘ LẶP:         " + repeat + " / " + cover + "    ( " + Math.floor(((float) repeat / cover)*100) + "% )");
+
+                panel.add(label1);
+                panel.add(label2);
+
+                Display.resultFrame.add(panel);
+                Display.resultFrame.setVisible(true);
+
+                return;
+            }
+            else {
+                if (((int) Game.robot.getX() - brickBlank + sizeCell == (int) Game.cellX.get(0)) && ((int) Game.robot.getY() - brickBlank == (int) Game.cellY.get(0))) {
+                    Game.root.add((Integer) (Game.robot.getAngle()/90));
+                    if ((Game.robot.getAngle()/90) == 0) Game.action.add((Integer) 0);
+                    if ((Game.robot.getAngle()/90) == 1) Game.action.add((Integer) 1);
+                    if ((Game.robot.getAngle()/90) == 2) Game.action.add((Integer) 3);
+                    if ((Game.robot.getAngle()/90) == 3) Game.action.add((Integer) 2);
+                }
+                if (((int) Game.robot.getX() - brickBlank - sizeCell == (int) Game.cellX.get(0)) && ((int) Game.robot.getY() - brickBlank == (int) Game.cellY.get(0))) {
+                    Game.root.add((Integer) (Game.robot.getAngle()/90));
+                    if ((Game.robot.getAngle()/90) == 0) Game.action.add((Integer) 3);
+                    if ((Game.robot.getAngle()/90) == 1) Game.action.add((Integer) 2);
+                    if ((Game.robot.getAngle()/90) == 2) Game.action.add((Integer) 1);
+                    if ((Game.robot.getAngle()/90) == 3) Game.action.add((Integer) 0);
+                }
+                if (((int) Game.robot.getX() - brickBlank == (int) Game.cellX.get(0)) && ((int) Game.robot.getY() - brickBlank + sizeCell== (int) Game.cellY.get(0))) {
+                    Game.root.add((Integer) (Game.robot.getAngle()/90));
+                    if ((Game.robot.getAngle()/90) == 0) Game.action.add((Integer) 2);
+                    if ((Game.robot.getAngle()/90) == 1) Game.action.add((Integer) 1);
+                    if ((Game.robot.getAngle()/90) == 2) Game.action.add((Integer) 0);
+                    if ((Game.robot.getAngle()/90) == 3) Game.action.add((Integer) 3);
+                }
+                if (((int) Game.robot.getX() - brickBlank == (int) Game.cellX.get(0)) && ((int) Game.robot.getY() - brickBlank - sizeCell == (int) Game.cellY.get(0))) {
+                    Game.root.add((Integer) (Game.robot.getAngle()/90));
+                    if ((Game.robot.getAngle()/90) == 0) Game.action.add((Integer) 0);
+                    if ((Game.robot.getAngle()/90) == 1) Game.action.add((Integer) 3);
+                    if ((Game.robot.getAngle()/90) == 2) Game.action.add((Integer) 2);
+                    if ((Game.robot.getAngle()/90) == 3) Game.action.add((Integer) 1);
+                }
+                
+                boolean blank;
+                
+                if ((Game.robot.getX() - brickBlank + sizeCell == Game.cellX.get(0)) && (Game.robot.getY() - brickBlank + sizeCell == Game.cellY.get(0))) {
+                    blank = true;
+                    for(Entity e : Game.floor.getEntities())
+                        if ((e instanceof Box) && (e.getX() == Game.robot.getX()) && (e.getY() == Game.robot.getY() + sizeCell)) {
+                            blank = false;
                             break;
                         }
+                    if (blank) {
+//                        Game.action.add((Integer) 0);
+//                        Game.action.add((Integer) 3);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 2);
+                        }
+                    }
+                    else {
+//                        Game.action.add((Integer) 3);
+//                        Game.action.add((Integer) 0);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 3);
+                        }
+                    }
                 }
-            
-            for (Entity e: Game.floor.getEntities())
-                if (e instanceof Box) sum--;
-            
-            repeat = Game.cellX.size() - cover - 1;
-            //
-            JPanel panel = new JPanel();
-            panel.setSize(300, 100);
-            panel.setLocation(0, 0);
-            panel.setLayout(new FlowLayout());
-            
-            JLabel label1 = new JLabel();
-            label1.setText("ĐỘ BAO PHỦ:     " + cover + " / " + sum + "    ( " + Math.floor(((float) cover / sum)*100) + "% )");
-            JLabel label2 = new JLabel();
-            label2.setText("ĐỘ LẶP:         " + repeat + " / " + cover + "    ( " + Math.floor(((float) repeat / cover)*100) + "% )");
-            
-            panel.add(label1);
-            panel.add(label2);
-            
-            Display.resultFrame.add(panel);
-            Display.resultFrame.setVisible(true);
-            
-            return;
+                
+                if ((Game.robot.getX() - brickBlank - sizeCell == Game.cellX.get(0)) && (Game.robot.getY() - brickBlank - sizeCell == Game.cellY.get(0))) {
+                    blank = true;
+                    for(Entity e : Game.floor.getEntities())
+                        if ((e instanceof Box) && (e.getX() == Game.robot.getX()) && (e.getY() == Game.robot.getY() - sizeCell)) {
+                            blank = false;
+                            break;
+                        }
+                    if (blank) {
+//                        Game.action.add((Integer) 2);
+//                        Game.action.add((Integer) 1);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 0);
+                        }
+                    }
+                    else {
+//                        Game.action.add((Integer) 1);
+//                        Game.action.add((Integer) 2);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 1);
+                        }
+                    }
+                }
+                
+                if ((Game.robot.getX() - brickBlank - sizeCell == Game.cellX.get(0)) && (Game.robot.getY() - brickBlank + sizeCell == Game.cellY.get(0))) {
+                    blank = true;
+                    for(Entity e : Game.floor.getEntities())
+                        if ((e instanceof Box) && (e.getX() == Game.robot.getX() - sizeCell) && (e.getY() == Game.robot.getY())) {
+                            blank = false;
+                            break;
+                        }
+                    if (blank) {
+//                        Game.action.add((Integer) 1);
+//                        Game.action.add((Integer) 0);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 3);
+                        }
+                    }
+                    else {
+//                        Game.action.add((Integer) 0);
+//                        Game.action.add((Integer) 1);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 0);
+                        }
+                    }
+                }
+                
+                if ((Game.robot.getX() - brickBlank + sizeCell == Game.cellX.get(0)) && (Game.robot.getY() - brickBlank - sizeCell == Game.cellY.get(0))) {
+                    blank = true;
+                    for(Entity e : Game.floor.getEntities())
+                        if ((e instanceof Box) && (e.getX() == Game.robot.getX() + sizeCell) && (e.getY() == Game.robot.getY())) {
+                            blank = false;
+                            break;
+                        }
+                    if (blank) {
+//                        Game.action.add((Integer) 3);
+//                        Game.action.add((Integer) 2);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 2);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 1);
+                        }
+                    }
+                    else {
+//                        Game.action.add((Integer) 2);
+//                        Game.action.add((Integer) 3);
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        Game.root.add((Integer) (Game.robot.getAngle()/90));
+                        if ((Game.robot.getAngle()/90) == 0) {
+                            Game.action.add((Integer) 0);
+                            Game.action.add((Integer) 1);
+                        }
+                        if ((Game.robot.getAngle()/90) == 1) {
+                            Game.action.add((Integer) 3);
+                            Game.action.add((Integer) 0);
+                        }
+                        if ((Game.robot.getAngle()/90) == 2) {
+                            Game.action.add((Integer) 2);
+                            Game.action.add((Integer) 3);
+                        }
+                        if ((Game.robot.getAngle()/90) == 3) {
+                            Game.action.add((Integer) 1);
+                            Game.action.add((Integer) 2);
+                        }
+                    }
+                }
+            }
         }
     }
 }

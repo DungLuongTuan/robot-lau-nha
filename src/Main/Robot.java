@@ -59,8 +59,8 @@ public class Robot extends Entity{
         }
         //System.out.println(this.angle + " " + goalAngle + " " + Game.currentAction + " " + rootClone.get(Game.currentAction) + " " + Game.action.get(Game.currentAction));
         if (this.angle != goalAngle) {
-            if (((360 + this.angle - goalAngle) % 360) > ((360 + goalAngle - this.angle) % 360)) this.angle = (this.angle + 1) % 360;
-            else this.angle = (this.angle - 1 + 360) % 360;
+            if (((360 + this.angle - goalAngle) % 360) > ((360 + goalAngle - this.angle) % 360)) this.angle = (this.angle + 2) % 360;
+            else this.angle = (this.angle - 2 + 360) % 360;
         }
         else {
             this.isRunning = true;
@@ -70,7 +70,7 @@ public class Robot extends Entity{
     }
     
     public void updateSpinning() {
-        this.angle = (this.angle + 1) % 360;
+        this.angle = (this.angle + 2) % 360;
         int goalAngle = this.angle;
         ArrayList<Integer> rootClone = new ArrayList<>(Game.root);
         

@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -45,6 +46,7 @@ public class Display {
     public static JFrame frame, resultFrame;
     public static JTextField sizeMapField;
     private paintJPanel upRightPanel, rightPanel, downRightPanel;
+    private JComboBox<String> pickComboBox;
     private JButton runButton, stopButton, resetButton, robotButton, fixedObstacleButton, runObstacleButton, waterButton, dustButton, changeMapButton;
     private String title;
     private int frameWidth, frameHeight, canvasWidth, canvasHeight;
@@ -75,8 +77,8 @@ public class Display {
         Game.root = new ArrayList<>();
         Game.cellX = new ArrayList<>();
         Game.cellY = new ArrayList<>();
-        MainController.readKnowledge();
-        MainController.readDirtyKnowledge();
+//        MainController.readKnowledge();
+//        MainController.readDirtyKnowledge();
         
         createDisplay();
     }
@@ -125,9 +127,18 @@ public class Display {
         createDustButton();
         createChangeMapButton();
         
+        // resize map area
         sizeMapField.setSize(100, 20);
-        sizeMapField.setLocation(10, 200);
+        sizeMapField.setLocation(10, 180);
         downRightPanel.add(sizeMapField);
+        
+        // pick algorithms
+        pickComboBox = new JComboBox<>();
+        pickComboBox.setSize(100, 20);
+        pickComboBox.setLocation(10, 220);
+        pickComboBox.addItem("STC");
+        pickComboBox.addItem("Full Spiral STC");
+        downRightPanel.add(pickComboBox);
         
         rightPanel.add(downRightPanel);
         rightPanel.add(upRightPanel);
@@ -165,6 +176,16 @@ public class Display {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (Game.robot != null && firstRun == true) {
+                    System.out.println(pickComboBox.getSelectedItem());
+                    if (pickComboBox.getSelectedItem().equals("STC")) {
+                        Game.algorithm = 1;
+                        MainController.readKnowledge(1);
+                    }
+                    else {
+                        Game.algorithm = 2;
+                        MainController.readKnowledge(2);
+                    }
+                    MainController.readDirtyKnowledge();
                     MainController.makeFirstNode();
                     firstRun = false;
                 }
@@ -191,11 +212,24 @@ public class Display {
         upRightPanel.add(resetButton);
         resetButton.addActionListener(new ActionListener() {
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(ActionEvent e) {    
+                //reset map
                 Game.sizeMap = 10;
                 Game.sizeCell = 60;
                 Game.sizeDirty = 50;
                 Game.sizeObject = 56;
+
+                // new map
+                try {
+                    int size = Integer.parseInt((sizeMapField.getText()));
+                    Game.sizeMap = size;
+                    Game.sizeCell = (Game.sizeCell*10/Game.sizeMap);
+                    Game.sizeDirty = (Game.sizeDirty*10/Game.sizeMap);
+                    Game.sizeObject = (Game.sizeObject*10/Game.sizeMap);
+                }
+                catch (NumberFormatException ex) {
+                    
+                }
                 
                 Game.floor = new Floor();
                 Game.node = new ArrayList<>();
@@ -434,7 +468,7 @@ public class Display {
     
     public void createChangeMapButton() {
         JButton changeMapButton = new JButton("Change map!!!");
-        changeMapButton.setBounds(140, 200, 130, 20);
+        changeMapButton.setBounds(140, 180, 130, 20);
         downRightPanel.add(changeMapButton);
         changeMapButton.addMouseListener(new MouseListener() {
             @Override
@@ -442,6 +476,7 @@ public class Display {
                 if (!Game.isRunning) {
                     try {
                         int size = Integer.parseInt((sizeMapField.getText()));
+                        System.out.println(size);
                         //reset map
                         Game.sizeMap = 10;
                         Game.sizeCell = 60;

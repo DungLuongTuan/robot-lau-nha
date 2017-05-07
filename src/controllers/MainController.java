@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -44,15 +45,18 @@ public class MainController {
         return(null);
     }
     
-    public static void readKnowledge() {
+    public static void readKnowledge(int algorithm) {
         FileInputStream fi;
         try {
             File directory = new File("");
-            String path = directory.getAbsolutePath() + "\\src\\Knowledge\\knowledge2.txt";
+            String path = directory.getAbsolutePath() + "\\src\\Knowledge\\knowledge" + algorithm + ".txt";
             fi = new FileInputStream(path);
             Scanner inp = new Scanner(fi,"UTF-8");
             
             // read array
+            Game.status = new int[7][4][2][2][2][2][2][2];
+            Game.movement = new ArrayList<>();
+            
             int j = 0;
             while (inp.hasNextLine()) {
                 String temp = inp.nextLine(); 
@@ -253,96 +257,98 @@ public class MainController {
         int sizeObject = (int) Game.sizeObject;
         int sizeMap = (int) Game.sizeMap;
         
-        /////////////////////////////////////////// check double edge /////////////////////////////////////////////////////////
-        upLeft = upRight = downLeft = downRight = true;
-        // check doubleEdge down
-        if ((int) Game.nodeY.get(Game.currentNode) < 20 + sizeCell*(sizeMap - 2)) {
-            for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + sizeCell)) upLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + sizeCell)) upRight = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) downLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) downRight = false;
-                }
-            }
-            if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge0 = true;
-            cnt = 0;
-            for(Integer node: Game.node) {
-                if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) {
-                    cnt++;
-                    if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge0 = false;
-                    if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) doubleEdge0 = false; 
-                }
-            }
-            if (cnt >= 2) doubleEdge0 = false;
-        }
-        // check doubleEdge left
-        upLeft = upRight = downLeft = downRight = true;
-        if ((int) Game.nodeX.get(Game.currentNode) > 20 + 2*sizeCell) {
-            for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 3*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upRight = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 3*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downRight = false;
-                }
-            }
-            if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge1 = true;
-            cnt = 0;
-            for(Integer node: Game.node) {
-                if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode))) {
-                    cnt++;
-                    if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge1 = false;
-                    if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode) - 2*sizeCell) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode))) doubleEdge1 = false; 
-                }
-            }
-            if (cnt >= 2) doubleEdge1 = false;
-        }
-        // check doubleEdge up
-        upLeft = upRight = downLeft = downRight = true;
-        if ((int) Game.nodeY.get(Game.currentNode) > 20 + 2*sizeCell) {
-            for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 3*sizeCell)) upLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 3*sizeCell)) upRight = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) downLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) downRight = false;
-                }
-            }
-            if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge2 = true;
-            cnt = 0;
-            for(Integer node: Game.node) {
-                if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) {
-                    cnt++;
-                    if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge2 = false;
-                    if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) doubleEdge2 = false; 
-                }
-            }
-            if (cnt >= 2) doubleEdge2 = false;
-        }
-        // check doubleEdge right
-        upLeft = upRight = downLeft = downRight = true;
-        if ((int) Game.nodeX.get(Game.currentNode) < 20 + sizeCell*(sizeMap - 2)) {
-            for(Entity e: Game.floor.getEntities()) {
-                if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upRight = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
-                    if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downRight = false;
-                }
-            }
-            if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge3 = true;
-            cnt = 0;
-            for(Integer node: Game.node) {
-                if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode))) {
-                    cnt++;
-                    if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge3 = false;
-                    if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode) + 2*sizeCell) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode))) doubleEdge3 = false; 
-                }
-            }
-            if (cnt >= 2) doubleEdge3 = false;
-        }
         
+        /////////////////////////////////////////// check double edge /////////////////////////////////////////////////////////
+        if (Game.algorithm == 2) {
+            upLeft = upRight = downLeft = downRight = true;
+            // check doubleEdge down
+            if ((int) Game.nodeY.get(Game.currentNode) < 20 + sizeCell*(sizeMap - 2)) {
+                for(Entity e: Game.floor.getEntities()) {
+                    if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + sizeCell)) upLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + sizeCell)) upRight = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) downLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) downRight = false;
+                    }
+                }
+                if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge0 = true;
+                cnt = 0;
+                for(Integer node: Game.node) {
+                    if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) {
+                        cnt++;
+                        if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge0 = false;
+                        if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode) + 2*sizeCell)) doubleEdge0 = false; 
+                    }
+                }
+                if (cnt >= 2) doubleEdge0 = false;
+            }
+            // check doubleEdge left
+            upLeft = upRight = downLeft = downRight = true;
+            if ((int) Game.nodeX.get(Game.currentNode) > 20 + 2*sizeCell) {
+                for(Entity e: Game.floor.getEntities()) {
+                    if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 3*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upRight = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 3*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downRight = false;
+                    }
+                }
+                if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge1 = true;
+                cnt = 0;
+                for(Integer node: Game.node) {
+                    if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode) - 2*sizeCell) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode))) {
+                        cnt++;
+                        if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge1 = false;
+                        if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode) - 2*sizeCell) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode))) doubleEdge1 = false; 
+                    }
+                }
+                if (cnt >= 2) doubleEdge1 = false;
+            }
+            // check doubleEdge up
+            upLeft = upRight = downLeft = downRight = true;
+            if ((int) Game.nodeY.get(Game.currentNode) > 20 + 2*sizeCell) {
+                for(Entity e: Game.floor.getEntities()) {
+                    if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 3*sizeCell)) upLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 3*sizeCell)) upRight = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) - sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) downLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode)) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) downRight = false;
+                    }
+                }
+                if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge2 = true;
+                cnt = 0;
+                for(Integer node: Game.node) {
+                    if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) {
+                        cnt++;
+                        if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge2 = false;
+                        if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode)) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode) - 2*sizeCell)) doubleEdge2 = false; 
+                    }
+                }
+                if (cnt >= 2) doubleEdge2 = false;
+            }
+            // check doubleEdge right
+            upLeft = upRight = downLeft = downRight = true;
+            if ((int) Game.nodeX.get(Game.currentNode) < 20 + sizeCell*(sizeMap - 2)) {
+                for(Entity e: Game.floor.getEntities()) {
+                    if (!(e instanceof Dirty) && !(e instanceof RunObstacle)) {
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode) - sizeCell)) upRight = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downLeft = false;
+                        if ((e.getX() - brickBlank == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && (e.getY() - brickBlank == (int) Game.nodeY.get(Game.currentNode))) downRight = false;
+                    }
+                }
+                if ((upLeft && downRight && !upRight & !downLeft) || (!upLeft && !downRight && upRight && downLeft)) doubleEdge3 = true;
+                cnt = 0;
+                for(Integer node: Game.node) {
+                    if (((int) Game.nodeX.get(node) == (int) Game.nodeX.get(Game.currentNode) + 2*sizeCell) && ((int) Game.nodeY.get(node) == (int) Game.nodeY.get(Game.currentNode))) {
+                        cnt++;
+                        if (((int) Game.nodeX.get(Game.currentNode) == (int) Game.nodeX.get(Game.father.get(node))) && ((int) Game.nodeY.get(Game.currentNode) == (int) Game.nodeY.get(Game.father.get(node)))) doubleEdge3 = false;
+                        if (((int) Game.nodeX.get(Game.father.get(Game.currentNode)) == Game.nodeX.get(Game.currentNode) + 2*sizeCell) && ((int) Game.nodeY.get(Game.father.get(Game.currentNode)) == (int) Game.nodeY.get(Game.currentNode))) doubleEdge3 = false; 
+                    }
+                }
+                if (cnt >= 2) doubleEdge3 = false;
+            }
+        }
         /////////////////////////////////////////// check passed node /////////////////////////////////////////////////////////
         
         for(Integer node: Game.node) {

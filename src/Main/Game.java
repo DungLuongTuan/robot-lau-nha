@@ -45,6 +45,7 @@ public class Game implements Runnable {
     public static int currentNode;
     public static int currentAction = -1000000000;
     public static boolean isRunning = false;
+    public static int algorithm = 1;
     
     // resizeable map
     public static int sizeMap = 10;
@@ -178,8 +179,7 @@ public class Game implements Runnable {
                 g.fillRect((int) (20 + i*cloneSizeCell + (cloneSizeCell - cloneSizeObject)/2), (int) (20 + j*cloneSizeCell + (cloneSizeCell - cloneSizeObject)/2), (int) cloneSizeObject, (int) cloneSizeObject);
             }
         g.setColor(null);
-        //System.out.println(cloneSizeCell + " " + cloneSizeDirty + " " + cloneSizeObject + " " + cloneSizeMap);
-        //System.out.println(Game.sizeCell + " " + Game.sizeDirty + " " + Game.sizeObject + " " + Game.sizeMap);
+
         // draw wall
         for(Entity e : cloneEntities)
             if (e instanceof Brick) e.render(g);
